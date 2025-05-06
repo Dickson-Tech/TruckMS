@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Truck Management System</h1>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Trucks ({{ trucks.count }})</h3>
+        {% if user.is_admin %}
+            <a href="{% url 'truck_create' %}" class="btn btn-primary mb-3">Add Truck</a>
+        {% endif %}
+    </div>
+    <div class="col-md-4">
+        <h3>Drivers ({{ drivers.count }})</h3>
+    </div>
+    <div class="col-md-4">
+        <h3>Trips ({{ trips.count }})</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Status</th>
+                    {% if user.is_admin %}
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for trip in trips %}
+                <tr>
+                    <td>{{ trip.origin }}</td>
+                    <td>{{ trip.destination }}</td>
+                    <td>{{ trip.status }}</td>
+                    {% if user.is_admin %}
+                    <td>
+                        {% if trip.status == 'PENDING' %}
+                            <a href="{% url 'trip_approve' trip.pk %}" class="btn btn-sm btn-success">Approve</a>
+                            <a href="{% url 'trip_cancel' trip.pk %}" class="btn btn-sm btn-danger">Cancel</a>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr><td colspan="{% if user.is_admin %}4{% else %}3{% endif %}">No trips available</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

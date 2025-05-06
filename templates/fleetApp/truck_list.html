@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Trucks</h1>
+{% if user.is_admin %}
+    <a href="{% url 'truck_create' %}" class="btn btn-primary mb-3">Add Truck</a>
+{% endif %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Registration</th>
+            <th>Model</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for truck in trucks %}
+        <tr>
+            <td>{{ truck.registration_number }}</td>
+            <td>{{ truck.model }}</td>
+            <td>{{ truck.capacity }} tons</td>
+            <td>{{ truck.status }}</td>
+            <td>
+                {% if user.is_admin %}
+                    <a href="{% url 'truck_update' truck.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'truck_delete' truck.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                {% endif %}
+                <a href="{% url 'truck_track' truck.pk %}" class="btn btn-sm btn-info">Track</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No trucks available</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+<!-- Compare this snippet from Templates/pages/truck_track.html: -->

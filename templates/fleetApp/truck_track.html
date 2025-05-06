@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Truck Management System</h1>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Trucks ({{ trucks.count }})</h3>
+        <a href="{% url 'truck_create' %}" class="btn btn-primary mb-3">Add Truck</a>
+        <!-- List trucks -->
+    </div>
+    <div class="col-md-4">
+        <h3>Drivers ({{ drivers.count }})</h3>
+        <!-- List drivers -->
+    </div>
+    <div class="col-md-4">
+        <h3>Trips ({{ trips.count }})</h3>
+        <!-- List trips -->
+    </div>
+</div>
+{% endblock %}
+
+# truck_management_system/templates/trucks/truck_list.html
+{% extends 'base.html' %}
+{% block content %}
+<h1>Trucks</h1>
+<a href="{% url 'truck_create' %}" class="btn btn-primary mb-3">Add Truck</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Registration</th>
+            <th>Model</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for truck in trucks %}
+        <tr>
+            <td>{{ truck.registration_number }}</td>
+            <td>{{ truck.model }}</td>
+            <td>{{ truck.capacity }} tons</td>
+            <td>{{ truck.status }}</td>
+            <td>
+                <a href="{% url 'truck_update' truck.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'truck_delete' truck.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                <a href="{% url 'truck_track' truck.pk %}" class="btn btn-sm btn-info">Track</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No trucks available</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+# truck_management_system/templates/trucks/truck_form.html
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'truck_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+
+# truck_management_system/templates/trucks/truck_confirm_delete.html
+{% extends 'base.html' %}
+{% block content %}
+<h1>Delete Truck</h1>
+<p>Are you sure you want to delete "{{ truck }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'truck_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
+
+# truck_management_system/templates/trucks/truck_track.html
+{% extends 'base.html' %}
+{% block content %}
+<h1>Track Truck: {{ truck }}</h1>
+<div id="map" style="height: 500px;"></div>
+<h3>Recent Locations</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Timestamp</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for location in locations %}
+        <tr>
+            <td>{{ location.latitude }}</td>
+            <td>{{ location.longitude }}</td>
+            <td>{{ location.timestamp }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">No location data available</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    var initialLatitude = {% if initial_location %}{{ initial_location.latitude }}{% else %}0{% endif %};
+    var initialLongitude = {% if initial_location %}{{ initial_location.longitude }}{% else %}0{% endif %};
+
+    var map = L.map('map').setView([initialLatitude, initialLongitude], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    {% if initial_location %}
+    var marker = L.marker([{{ initial_location.latitude }}, {{ initial_location.longitude }}]).addTo(map);
+    marker.bindPopup("Truck: {{ truck }}").openPopup();
+    {% endif %}
+
+    var ws = new WebSocket('ws://' + window.location.host + '/ws/truck/{{ truck.id }}/');
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        map.setView([data.latitude, data.longitude], 13);
+        if (marker) {
+            marker.setLatLng([data.latitude, data.longitude]);
+        } else {
+            marker = L.marker([data.latitude, data.longitude]).addTo(map);
+            marker.bindPopup("Truck: {{ truck }}").openPopup();
+        }
+    };
+</script>
+{% endblock %}
