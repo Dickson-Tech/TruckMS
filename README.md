@@ -10,5 +10,5 @@ leakage of data/buffer overflow. The system follows the Design from the service 
 What this system solves?
 
 The system will ensure the owners and the stakeholders know the route rather the Origin and the Destination of their fleets while loaded with cargoes.
-They will monitor the location in where the fleet is and also they will know the weight the fleet is loaded with, who is the driver handling that particular fleet. The Onwer and Managers will also know which vehicle is taking most trip and will know the exact 
+They will monitor the location in where the fleet is and also they will know the weight the fleet is loaded with, who is the driver handling that particular fleet. The Owners and Managers will also know which vehicle is taking most trip and will know the exact condition of their fleet and can allocate resources if the fleet is confronted with challenges.
 
